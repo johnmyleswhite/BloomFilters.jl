@@ -2,7 +2,10 @@
 function generate_hashes(n::Integer, k::Integer)
 	hashes = Array(Function, k)
 	for i in 1:k
-		hashes[i] = s -> mod(i * hash(s), n) + 1
+		let
+			j = i
+			hashes[i] = s -> mod(j * hash(s), n) + 1
+		end
 	end
 	return hashes
 end

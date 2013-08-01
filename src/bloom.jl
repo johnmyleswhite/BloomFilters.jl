@@ -1,10 +1,9 @@
-# TODO: Avoid use of untyped, anonymous hash functions
 function generate_hashes(n::Integer, k::Integer)
 	hashes = Array(Function, k)
 	for i in 1:k
-		let
-			j = i
-			hashes[i] = s -> mod(j * hash(s), n) + 1
+		let j = i
+			f(s::String) = mod(j * hash(s), n) + 1
+			hashes[i] = f
 		end
 	end
 	return hashes

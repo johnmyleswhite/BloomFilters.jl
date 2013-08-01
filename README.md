@@ -5,9 +5,9 @@ Bloom filters are a probabilistic data structure that can be used
 to test the inclusion and exclusion of items in a list. This is
 achieved by using an array of n bits and k distinct hash functions
 to map every item in the initial list into an n-bit pattern. The
-Bloom filter stores the Boolean OF of these bit patterns and hence
+Bloom filter stores the Boolean OR of these bit patterns and hence
 recognizes every item it has every seen. It also falsely recognizes
-some elements that it has never seen.
+some elements that it has never seen. It never generates false negatives.
 
 # Usage
 

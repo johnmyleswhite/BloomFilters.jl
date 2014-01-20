@@ -1,29 +1,27 @@
-function generate_hashes(n::Integer, k::Integer)
+function genhashes(n::Integer, k::Integer)
 	hashes = Array(Function, k)
 	for i in 1:k
-		let j = i
-			f(s::String) = mod(j * hash(s), n) + 1
-			hashes[i] = f
-		end
+		f(s::Any) = mod(i * hash(s), n) + 1
+		hashes[i] = f
 	end
 	return hashes
 end
 
-type BloomFilter
+immutable BloomFilter
 	mask::BitVector
 	hashes::Vector{Function}
 end
 
 function BloomFilter(mask::BitVector, k::Integer)
-	BloomFilter(mask, generate_hashes(length(mask), k))
+	BloomFilter(mask, genhashes(length(mask), k))
 end
 
 function BloomFilter(n::Integer, hashes::Vector{Function})
-	BloomFilter(BitVector(n), hashes)
+	BloomFilter(falses(n), hashes)
 end
 
 function BloomFilter(n::Integer, k::Integer)
-	BloomFilter(BitVector(n), generate_hashes(n, k))
+	BloomFilter(falses(n), genhashes(n, k))
 end
 
 function add!(filter::BloomFilter, key::Any)
@@ -49,7 +47,7 @@ end
 
 function contains(filter::BloomFilter, keys::Vector)
 	m = length(keys)
-	res = BitVector(m)
+	res = falses(m)
 	for i in 1:m
 		res[i] = contains(filter, keys[i])
 	end

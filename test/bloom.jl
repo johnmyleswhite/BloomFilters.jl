@@ -4,7 +4,7 @@ n = 10
 k = 5
 keys = ["A", "B", "C"]
 
-mask = BitVector(n)
+mask = falses(n)
 hashes = Array(Function, k)
 hashes[1] = s -> mod(1 * hash(s), n) + 1
 hashes[2] = s -> mod(2 * hash(s), n) + 1

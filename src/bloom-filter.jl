@@ -125,6 +125,8 @@ function contains(bf::BloomFilter, key::Any)
     return true
 end
 
+in(key::Any, bf::BloomFilter) = contains(bf, key)
+
 # Vector variants
 function add!(bf::BloomFilter, keys::Vector{Any})
     for key in keys

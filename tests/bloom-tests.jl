@@ -49,10 +49,12 @@ try
     end
     )
 
+    # also test in() while we're at it.
     println("For lookups:")
     @time(
     for test_key in test_keys
         assert(contains(bfa, test_key))
+        assert(in(test_key,bfa))
     end
     )
 

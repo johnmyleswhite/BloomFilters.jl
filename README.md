@@ -22,7 +22,7 @@ using BloomFilters
 
 bf = BloomFilter(1000, 0.001)  # Create an in-memory Bloom filter
 							   # with a capacity of 1K elements and
-							   # expected error rate of 1%
+							   # expected error rate of 0.1%
 
 add!(bf, "My first element.")
 contains(bf, "My first element.")   # Returns true

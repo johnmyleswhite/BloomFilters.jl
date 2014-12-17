@@ -27,6 +27,7 @@ bf = BloomFilter(1000, 0.001)  # Create an in-memory Bloom filter
 add!(bf, "My first element.")
 contains(bf, "My first element.")   # Returns true
 contains(bf, "My second element.")  # Returns false
+"My first element." in bf           # Returns true
 show(bf)
 
 # Prints:

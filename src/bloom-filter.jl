@@ -115,7 +115,7 @@ function add!(bf::BloomFilter, key::Any)
     end
 end
 
-function contains(bf::BloomFilter, key::Any)
+function Base.contains(bf::BloomFilter, key::Any)
     hashes = hash_n(key, bf.k, bf.n_bits)
     for h in hashes
         if bf.array[h] != 1
@@ -134,7 +134,7 @@ function add!(bf::BloomFilter, keys::Vector{Any})
     end
 end
 
-function contains(bf::BloomFilter, keys::Vector{Any})
+function Base.contains(bf::BloomFilter, keys::Vector{Any})
     m = length(keys)
     res = falses(m)
     for i in 1:m
@@ -144,7 +144,7 @@ function contains(bf::BloomFilter, keys::Vector{Any})
 end
 
 # Print
-function show(io::IO, bf::BloomFilter)
+function Base.show(io::IO, bf::BloomFilter)
     @printf "Bloom filter with capacity %d, " bf.capacity
     @printf "error rate of %.2f%%, and k of %d.\n" (bf.error_rate * 100) (bf.k)
     @printf "Total bits required: %d (%.1f / element).\n" bf.n_bits (bf.n_bits / bf.capacity)

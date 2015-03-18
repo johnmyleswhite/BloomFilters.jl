@@ -164,6 +164,8 @@ try
     assert(contains(bfb, test_other_d))
     assert(contains(bfb, test_other_e))  # Check that we're hashing the value, not object ref
 
+    println("Successfully passed all tests.")
+
 finally
     # Clean up mmap-backed temp files (otherwise can end up re-opening them and writing multiple key sets to one file!)
     rm("/tmp/test_array1.array")

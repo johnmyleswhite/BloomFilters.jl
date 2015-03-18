@@ -15,8 +15,8 @@ end
 # which uses 2 hash functions vs. k and has comparable properties
 # See Kirsch and Mitzenmacher, 2008: http://www.eecs.harvard.edu/~kirsch/pubs/bbbf/rsa.pdf
 function hash_n(key::Any, k::Int, max::Int)
-    a_hash = hash(key, uint(0))
-    b_hash = hash(key, uint(170))
+    a_hash = hash(key, UInt(0))
+    b_hash = hash(key, UInt(170))
     hashes = Array(Uint, k)
     for i in 1:k
         hashes[i] = mod(a_hash + i * b_hash, max) + 1
@@ -84,15 +84,15 @@ end
 # USE CASES: Recommended when extreme space efficiency is required, and modestly slower insertions
 # and lookups are tolerable.
 function BloomFilter(capacity::Int, error_rate::Float64)
-    bits_per_elem = int(ceil(-1.0 * (log(error_rate) / (log(2) ^ 2))))
-    k_hashes = int(round(log(2) * bits_per_elem))  # Note: ceil() would be strictly more conservative
+    bits_per_elem = round(Int, ceil(-1.0 * (log(error_rate) / (log(2) ^ 2))))
+    k_hashes = round(Int, log(2) * bits_per_elem)  # Note: ceil() would be strictly more conservative
     n_bits = capacity * bits_per_elem
     BloomFilter(falses((1, n_bits)), k_hashes, capacity, error_rate, n_bits, "")
 end
 
 function BloomFilter(mmap_handle::IOStream, capacity::Int, error_rate::Float64)
-    bits_per_elem = int(ceil(-1.0 * (log(error_rate) / (log(2) ^ 2))))
-    k_hashes = int(round(log(2) * bits_per_elem))  # Note: ceil() would be strictly more conservative
+    bits_per_elem = round(Int, ceil(-1.0 * (log(error_rate) / (log(2) ^ 2))))
+    k_hashes = round(Int, log(2) * bits_per_elem)  # Note: ceil() would be strictly more conservative
     n_bits = capacity * bits_per_elem
     mb = mmap_bitarray((n_bits, 1), mmap_handle)
     BloomFilter(mb, k_hashes, capacity, error_rate, n_bits, mmap_handle.name)

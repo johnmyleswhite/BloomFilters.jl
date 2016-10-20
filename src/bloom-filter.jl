@@ -1,4 +1,5 @@
 using Compat
+import Base.Mmap: mmap
 
 include("probabilities.jl")
 
@@ -8,7 +9,7 @@ type BloomFilter
     capacity::Int
     error_rate::Float64
     n_bits::Int
-    mmap_location::String
+    mmap_location::AbstractString
 end
 
 ### Hash functions (uses 2 hash method)
@@ -17,9 +18,9 @@ end
 # which uses 2 hash functions vs. k and has comparable properties
 # See Kirsch and Mitzenmacher, 2008: http://www.eecs.harvard.edu/~kirsch/pubs/bbbf/rsa.pdf
 function hash_n(key::Any, k::Int, max::Int)
-    a_hash = hash(key, @compat UInt(0))
-    b_hash = hash(key, @compat UInt(170))
-    hashes = Array(Uint, k)
+    a_hash = hash(key, UInt(0))
+    b_hash = hash(key, UInt(170))
+    hashes = Array(UInt, k)
     for i in 1:k
         hashes[i] = mod(a_hash + i * b_hash, max) + 1
     end
@@ -38,11 +39,11 @@ end
 
 function BloomFilter(mmap_handle::IOStream, capacity::Int, bits_per_elem::Int, k_hashes::Int)
     n_bits = capacity * bits_per_elem
-    mb = mmap_bitarray((n_bits, 1), mmap_handle)
+    mb = mmap(mmap_handle, BitArray, n_bits)
     BloomFilter(mb, k_hashes, capacity, NaN, n_bits, mmap_handle.name)
 end
 
-function BloomFilter(mmap_string::String, capacity::Int, bits_per_elem::Int, k_hashes::Int)
+function BloomFilter(mmap_string::AbstractString, capacity::Int, bits_per_elem::Int, k_hashes::Int)
     if isfile(mmap_string)
         mmap_handle = open(mmap_string, "r+")
     else
@@ -66,11 +67,11 @@ end
 function BloomFilter(mmap_handle::IOStream, capacity::Int, error_rate::Float64, k_hashes::Int)
     bits_per_elem, error_rate = get_k_error(error_rate, k_hashes)
     n_bits = capacity * bits_per_elem
-    mb = mmap_bitarray((n_bits, 1), mmap_handle)
+    mb = mmap(mmap_handle, BitArray, n_bits)
     BloomFilter(mb, k_hashes, capacity, error_rate, n_bits, mmap_handle.name)
 end
 
-function BloomFilter(mmap_string::String, capacity::Int, error_rate::Float64, k_hashes::Int)
+function BloomFilter(mmap_string::AbstractString, capacity::Int, error_rate::Float64, k_hashes::Int)
     if isfile(mmap_string)
         mmap_handle = open(mmap_string, "r+")
     else
@@ -95,12 +96,12 @@ end
 function BloomFilter(mmap_handle::IOStream, capacity::Int, error_rate::Float64)
     bits_per_elem = round(Int, ceil(-1.0 * (log(error_rate) / (log(2) ^ 2))))
     k_hashes = round(Int, log(2) * bits_per_elem)  # Note: ceil() would be strictly more conservative
-    n_bits = capacity * bits_per_elem
-    mb = mmap_bitarray((n_bits, 1), mmap_handle)
+    n_bits = capacity * bits_per_elem    
+    mb = mmap(mmap_handle, BitArray, n_bits)
     BloomFilter(mb, k_hashes, capacity, error_rate, n_bits, mmap_handle.name)
 end
 
-function BloomFilter(mmap_string::String, capacity::Int, error_rate::Float64)
+function BloomFilter(mmap_string::AbstractString, capacity::Int, error_rate::Float64)
     if isfile(mmap_string)
         mmap_handle = open(mmap_string, "r+")
     else

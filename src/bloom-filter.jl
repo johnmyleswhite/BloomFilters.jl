@@ -1,3 +1,5 @@
+using Compat
+
 include("probabilities.jl")
 
 type BloomFilter
@@ -15,8 +17,8 @@ end
 # which uses 2 hash functions vs. k and has comparable properties
 # See Kirsch and Mitzenmacher, 2008: http://www.eecs.harvard.edu/~kirsch/pubs/bbbf/rsa.pdf
 function hash_n(key::Any, k::Int, max::Int)
-    a_hash = hash(key, UInt(0))
-    b_hash = hash(key, UInt(170))
+    a_hash = hash(key, @compat UInt(0))
+    b_hash = hash(key, @compat UInt(170))
     hashes = Array(Uint, k)
     for i in 1:k
         hashes[i] = mod(a_hash + i * b_hash, max) + 1

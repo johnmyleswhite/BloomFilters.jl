@@ -20,7 +20,7 @@ end
 function hash_n(key::Any, k::Int, max::Int)
     a_hash = hash(key, UInt(0))
     b_hash = hash(key, UInt(170))
-    hashes = Array(UInt, k)
+    hashes = VERSION >= v"0.6.0" ? Array{UInt}(k) : Array(UInt, k)
     for i in 1:k
         hashes[i] = mod(a_hash + i * b_hash, max) + 1
     end

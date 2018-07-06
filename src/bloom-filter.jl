@@ -1,9 +1,10 @@
 using Compat
-import Base.Mmap: mmap
+using Mmap: mmap
+using Printf
 
 include("probabilities.jl")
 
-type BloomFilter
+mutable struct BloomFilter
     array::BitArray
     k::Int
     capacity::Int
@@ -20,7 +21,7 @@ end
 function hash_n(key::Any, k::Int, max::Int)
     a_hash = hash(key, UInt(0))
     b_hash = hash(key, UInt(170))
-    hashes = Array(UInt, k)
+    hashes = Array{UInt, 1}(undef, k)
     for i in 1:k
         hashes[i] = mod(a_hash + i * b_hash, max) + 1
     end

@@ -2,7 +2,7 @@
 # when specifying k and the error rate, but not
 # the number of required bits per element
 # Table from: http://pages.cs.wisc.edu/~cao/papers/summary-cache/node8.html
-k_errors = Array(Any, 12)
+k_errors = Vector{Vector{Float64}}(undef, 12)
 
 k_errors[1] = [1.0,
               0.3930000000, 0.2830000000, 0.2210000000, 0.1810000000, 0.1540000000,

@@ -2,13 +2,13 @@
 # make sure to delete any /tmp arrays created - otherwise
 # the filter(s) will become too full and tests will fail
 using BloomFilters
-
+using Printf
 
 try
     # First set up 9 sample Bloom filters using different constructors
     # (Ordered as in bloom-filter.jl)
     # Raw construction
-    bf0 = BloomFilter(BitVector(10), 4, 10, 0.01, 20, "")
+    bf0 = BloomFilter(BitVector(undef, 10), 4, 10, 0.01, 20, "")
 
     # First group of constructors: capacity, bits per element, k
     bf1 = BloomFilter(1000, 20, 4)
@@ -33,7 +33,7 @@ try
 
     # Test with random strings
     random_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-    test_keys = Array(String, n)
+    test_keys = Array{String}(undef, n)
     for i in 1:n
         temp_str = ""
         for j in 1:8
@@ -53,8 +53,8 @@ try
     println("For lookups:")
     @time(
     for test_key in test_keys
-        assert(contains(bfa, test_key))
-        assert(in(test_key,bfa))
+        @assert(contains(bfa, test_key))
+        @assert(in(test_key,bfa))
     end
     )
 
@@ -68,23 +68,23 @@ try
     println("For lookups (mmap-backed):")
     @time(
     for test_key in test_keys
-        assert(contains(bfb, test_key))
+        @assert(contains(bfb, test_key))
     end
     )
 
     # Test vectorized add!/contains
     bf_vector = BloomFilter(n, 0.001, 5)
     add!(bf_vector, test_keys)
-    assert(all(contains(bf_vector, test_keys)))
+    @assert(all(contains(bf_vector, test_keys)))
 
     # Test hashing non-string objects and non-string vectors
     numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     add!(bf_vector, numbers)
-    assert(all(contains(bf_vector, numbers)))
+    @assert(all(contains(bf_vector, numbers)))
 
     # Probabilistic tests – note these may fail every once in a while...
     # (but very very rarely)
-    test_keys_p = Array(String, n)
+    test_keys_p = Array{String}(undef, n)
     for i in 1:n
         temp_str = ""
         for j in 1:9  # Longer so not in by definition
@@ -113,34 +113,34 @@ try
     @printf "In-memory Bloom is %.2f%% full\n" (100 * sum(bfa.array) / bfa.n_bits)
     @printf "%d false positives in %d tests\n" false_positives_a n
     @printf "Error rate for in-memory Bloom filter %.2f%%\n" (bfa.error_rate * 100)
-    assert((false_positives_a / n) <= (1.75 * bfa.error_rate))
+    @assert((false_positives_a / n) <= (1.75 * bfa.error_rate))
 
     @printf "Mmap'd Bloom is %.2f%% full\n" (100 * sum(bfb.array) / bfb.n_bits)
     @printf "%d false positives in %d tests\n" false_positives_b n
     @printf "Error rate for in-memory Bloom filter %.2f%%\n" (bfb.error_rate * 100)
-    assert((false_positives_b / n) <= (1.75 * bfb.error_rate))
-    assert(false_positives_a == false_positives_b)  # Must be true since bfa and bfb should be identical at bit-level
+    @assert((false_positives_b / n) <= (1.75 * bfb.error_rate))
+    @assert(false_positives_a == false_positives_b)  # Must be true since bfa and bfb should be identical at bit-level
 
     # Test re-opening bfb
     bfb = 0
-    gc()
+    GC.gc()
 
     bfb = BloomFilter(open("/tmp/test_array_lg.array", "r+"), n, 0.001, 5)
     println("For lookups after re-opening (mmap-backed):")
     @time(
     for test_key in test_keys
-        assert(contains(bfb, test_key))
+        @assert(contains(bfb, test_key))
     end
     )
 
     bfb = 0
-    gc()
+    GC.gc()
 
     bfb = BloomFilter("/tmp/test_array_lg.array", n, 0.001, 5)
     println("For lookups after re-opening second time (mmap-backed):")
     @time(
     for test_key in test_keys
-        assert(contains(bfb, test_key))
+        @assert(contains(bfb, test_key))
     end
     )
 
@@ -158,16 +158,17 @@ try
     add!(bfb, test_other_c)
     add!(bfb, test_other_d)
 
-    assert(contains(bfb, test_other_a))
-    assert(contains(bfb, test_other_b))
-    assert(contains(bfb, test_other_c))
-    assert(contains(bfb, test_other_d))
-    assert(contains(bfb, test_other_e))  # Check that we're hashing the value, not object ref
+    @assert(contains(bfb, test_other_a))
+    @assert(contains(bfb, test_other_b))
+    @assert(contains(bfb, test_other_c))
+    @assert(contains(bfb, test_other_d))
+    @assert(contains(bfb, test_other_e))  # Check that we're hashing the value, not object ref
 
     println("Successfully passed all tests.")
 
 finally
-    # Clean up mmap-backed temp files (otherwise can end up re-opening them and writing multiple key sets to one file!)
+# Clean up mmap-backed temp files (otherwise can end up re-opening them and writing multiple key sets to one file!)
+
     rm("/tmp/test_array1.array")
     rm("/tmp/test_array2.array")
     rm("/tmp/test_array3.array")

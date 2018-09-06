@@ -97,7 +97,7 @@ end
 function BloomFilter(mmap_handle::IOStream, capacity::Int, error_rate::Float64)
     bits_per_elem = round(Int, ceil(-1.0 * (log(error_rate) / (log(2) ^ 2))))
     k_hashes = round(Int, log(2) * bits_per_elem)  # Note: ceil() would be strictly more conservative
-    n_bits = capacity * bits_per_elem    
+    n_bits = capacity * bits_per_elem
     mb = mmap(mmap_handle, BitArray, n_bits)
     BloomFilter(mb, k_hashes, capacity, error_rate, n_bits, mmap_handle.name)
 end
@@ -111,7 +111,7 @@ function BloomFilter(mmap_string::AbstractString, capacity::Int, error_rate::Flo
     BloomFilter(mmap_handle, capacity, error_rate)
 end
 
-### Bloom filter functions: insert!, add! (alias to insert), contains, and show
+### Bloom filter functions: insert!, add! (alias to insert), in, contains, and show
 function add!(bf::BloomFilter, key::Any)
     hashes = hash_n(key, bf.k, bf.n_bits)
     for h in hashes
@@ -119,7 +119,7 @@ function add!(bf::BloomFilter, key::Any)
     end
 end
 
-function Base.contains(bf::BloomFilter, key::Any)
+function Base.in(key::Any, bf::BloomFilter)
     hashes = hash_n(key, bf.k, bf.n_bits)
     for h in hashes
         if bf.array[h] != 1
@@ -129,7 +129,7 @@ function Base.contains(bf::BloomFilter, key::Any)
     return true
 end
 
-Base.in(key::Any, bf::BloomFilter) = contains(bf, key)
+contains(bf::BloomFilter, key::Any) = in(key, bf)
 
 # Vector variants
 function add!(bf::BloomFilter, keys::Vector{Any})
@@ -138,7 +138,7 @@ function add!(bf::BloomFilter, keys::Vector{Any})
     end
 end
 
-function Base.contains(bf::BloomFilter, keys::Vector{Any})
+function contains(bf::BloomFilter, keys::Vector{Any})
     m = length(keys)
     res = falses(m)
     for i in 1:m

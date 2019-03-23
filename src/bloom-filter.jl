@@ -18,7 +18,7 @@ end
 # Get the nth hash of a string using the formula hash_a + n * hash_b
 # which uses 2 hash functions vs. k and has comparable properties
 # See Kirsch and Mitzenmacher, 2008: http://www.eecs.harvard.edu/~kirsch/pubs/bbbf/rsa.pdf
-function hash_n(key::Any, k::Int, max::Int)
+function hash_n(key::T, k::Int, max::Int) where {T}
     a_hash = hash(key, UInt(0))
     b_hash = hash(key, UInt(170))
     hashes = Array{UInt, 1}(undef, k)
@@ -97,7 +97,7 @@ end
 function BloomFilter(mmap_handle::IOStream, capacity::Int, error_rate::Float64)
     bits_per_elem = round(Int, ceil(-1.0 * (log(error_rate) / (log(2) ^ 2))))
     k_hashes = round(Int, log(2) * bits_per_elem)  # Note: ceil() would be strictly more conservative
-    n_bits = capacity * bits_per_elem    
+    n_bits = capacity * bits_per_elem
     mb = mmap(mmap_handle, BitArray, n_bits)
     BloomFilter(mb, k_hashes, capacity, error_rate, n_bits, mmap_handle.name)
 end
@@ -112,14 +112,14 @@ function BloomFilter(mmap_string::AbstractString, capacity::Int, error_rate::Flo
 end
 
 ### Bloom filter functions: insert!, add! (alias to insert), contains, and show
-function add!(bf::BloomFilter, key::Any)
+function add!(bf::BloomFilter, key::T) where {T}
     hashes = hash_n(key, bf.k, bf.n_bits)
     for h in hashes
         bf.array[h] = 1
     end
 end
 
-function Base.contains(bf::BloomFilter, key::Any)
+function Base.in(key::T, bf::BloomFilter) where {T}
     hashes = hash_n(key, bf.k, bf.n_bits)
     for h in hashes
         if bf.array[h] != 1
@@ -129,20 +129,20 @@ function Base.contains(bf::BloomFilter, key::Any)
     return true
 end
 
-Base.in(key::Any, bf::BloomFilter) = contains(bf, key)
+@deprecate contains(bf::BloomFilter, key::T) where {T} Base.in(key, bf)
 
 # Vector variants
-function add!(bf::BloomFilter, keys::Vector{Any})
+function add!(bf::BloomFilter, keys::Vector{T}) where {T}
     for key in keys
         add!(bf, key)
     end
 end
 
-function Base.contains(bf::BloomFilter, keys::Vector{Any})
+function Base.in(keys::Vector{T}, bf::BloomFilter) where {T}
     m = length(keys)
     res = falses(m)
     for i in 1:m
-        res[i] = contains(bf, keys[i])
+        res[i] = in(keys[i], bf)
     end
     return res
 end

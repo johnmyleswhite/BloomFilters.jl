@@ -1,5 +1,6 @@
 name = "BloomFilters"
 uuid = "d3d7f49f-8593-5289-ba71-9c4f4848f489"
+version = "0.3.0"
 
 [deps]
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
